@@ -298,7 +298,7 @@ def analyze_video_file(video_file, analyzer):
                 for i, col in enumerate(cols):
                     with col:
                         frame_idx = i * (len(frames) // num_display)
-                        st.image(frames[frame_idx], caption=f"Frame {frame_idx}", use_container_width=True)
+                        st.image(frames[frame_idx], caption=f"Frame {frame_idx}", use_column_width=True)
             
             # Analysis summary
             st.subheader("📋 Analysis Summary")
