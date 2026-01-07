@@ -5,6 +5,7 @@ Visualization utilities for explainability layer
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import librosa.display
 from typing import List, Tuple, Dict
 import io
 from PIL import Image
@@ -175,8 +176,6 @@ class AudioVisualizer:
         Returns:
             Matplotlib figure
         """
-        import librosa.display
-        
         fig, ax = plt.subplots(figsize=(14, 6))
         
         # Display spectrogram
