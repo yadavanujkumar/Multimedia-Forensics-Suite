@@ -7,13 +7,13 @@ import numpy as np
 from typing import List, Tuple, Dict
 import os
 
-# Try to import MTCNN, fall back to OpenCV DNN if not available
+# Try to import MTCNN, fall back to OpenCV Haar Cascades if not available
 try:
     from mtcnn import MTCNN
     USE_MTCNN = True
 except ImportError:
     USE_MTCNN = False
-    print("MTCNN not available, using OpenCV DNN face detector")
+    print("MTCNN not available, using OpenCV Haar Cascade face detector")
 
 
 class VideoPreprocessor:
@@ -35,7 +35,7 @@ class VideoPreprocessor:
             self.face_detector = MTCNN(min_face_size=50)
             self.detector_type = 'mtcnn'
         else:
-            # Use OpenCV's DNN face detector as fallback
+            # Use OpenCV's Haar Cascade face detector as fallback
             self.face_detector = None
             self.detector_type = 'opencv'
             # Initialize OpenCV face detector
