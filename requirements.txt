@@ -5,11 +5,9 @@ pandas==2.0.3
 # Deep Learning
 torch==2.0.1
 torchvision==0.15.2
-tensorflow==2.13.0
 
 # Computer Vision
 opencv-python==4.8.0.74
-mtcnn==0.1.1
 Pillow==10.0.0
 
 # Audio Processing
@@ -28,3 +26,7 @@ plotly==5.15.0
 # Utilities
 tqdm==4.65.0
 pydub==0.25.1
+
+# Optional: MTCNN for better face detection (requires TensorFlow)
+# To use MTCNN, install: pip install mtcnn tensorflow
+# Otherwise, OpenCV Haar Cascades will be used as fallback

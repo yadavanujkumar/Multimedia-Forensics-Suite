@@ -4,9 +4,16 @@ Video preprocessing and frame extraction module
 
 import cv2
 import numpy as np
-from mtcnn import MTCNN
 from typing import List, Tuple, Dict
 import os
+
+# Try to import MTCNN, fall back to OpenCV DNN if not available
+try:
+    from mtcnn import MTCNN
+    USE_MTCNN = True
+except ImportError:
+    USE_MTCNN = False
+    print("MTCNN not available, using OpenCV DNN face detector")
 
 
 class VideoPreprocessor:
@@ -23,7 +30,18 @@ class VideoPreprocessor:
         """
         self.frame_sample_rate = frame_sample_rate
         self.face_detection_threshold = face_detection_threshold
-        self.face_detector = MTCNN(min_face_size=50)
+        
+        if USE_MTCNN:
+            self.face_detector = MTCNN(min_face_size=50)
+            self.detector_type = 'mtcnn'
+        else:
+            # Use OpenCV's DNN face detector as fallback
+            self.face_detector = None
+            self.detector_type = 'opencv'
+            # Initialize OpenCV face detector
+            self.face_cascade = cv2.CascadeClassifier(
+                cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
+            )
     
     def extract_frames(self, video_path: str) -> Tuple[List[np.ndarray], Dict]:
         """
@@ -77,7 +95,7 @@ class VideoPreprocessor:
     
     def detect_faces(self, frame: np.ndarray) -> List[Dict]:
         """
-        Detect faces in a frame using MTCNN
+        Detect faces in a frame using MTCNN or OpenCV
         
         Args:
             frame: RGB frame
@@ -85,15 +103,33 @@ class VideoPreprocessor:
         Returns:
             List of face detections with bounding boxes and confidence
         """
-        detections = self.face_detector.detect_faces(frame)
-        
-        # Filter by confidence threshold
-        filtered_detections = [
-            d for d in detections 
-            if d['confidence'] >= self.face_detection_threshold
-        ]
-        
-        return filtered_detections
+        if self.detector_type == 'mtcnn':
+            detections = self.face_detector.detect_faces(frame)
+            
+            # Filter by confidence threshold
+            filtered_detections = [
+                d for d in detections 
+                if d['confidence'] >= self.face_detection_threshold
+            ]
+            
+            return filtered_detections
+        else:
+            # Use OpenCV Haar Cascade
+            gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+            faces = self.face_cascade.detectMultiScale(
+                gray, scaleFactor=1.1, minNeighbors=5, minSize=(50, 50)
+            )
+            
+            # Convert to MTCNN-like format
+            detections = []
+            for (x, y, w, h) in faces:
+                detections.append({
+                    'box': [int(x), int(y), int(w), int(h)],
+                    'confidence': 0.95,  # Haar cascades don't provide confidence
+                    'keypoints': {}  # No keypoints from Haar
+                })
+            
+            return detections
     
     def extract_face_regions(self, frame: np.ndarray, 
                             detections: List[Dict],
